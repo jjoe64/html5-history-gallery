@@ -1,0 +1,157 @@
+<!doctype html>
+<html>
+<head>
+<style type="text/css">
+#container, #footer, #tip {
+	width: 600px;
+	margin: auto;
+	border: 2px solid white;
+	border-radius: 15px;
+	background: #cecece;
+	margin-top: 10px;
+}
+
+#footer, #tip {
+	background: #aeaeae;
+	text-align: center;
+	font-size: 10pt;
+	font-familiy: sans-serif;
+}
+
+#tip {
+	padding-bottom: 10px;
+	font-size: 12pt;
+}
+
+#thumbs {
+	margin: 6px 6px 6px 30px
+}
+
+#thumbs img.active {
+	border-top: 3px solid #ff8888;
+	border-bottom: 3px solid #ff8888;
+	opacity: 1;
+}
+
+#thumbs img {
+	width: 100px;
+	height: 80px;
+	margin-right: 4px;
+	border: 3px solid transparent;
+	opacity: 0.5;
+	z-index: 21;
+}
+
+#big {
+	width: 588px;
+	margin: 6px;
+}
+
+#selector {
+	position: absolute;
+	width: 100px;
+	height: 80px;
+	border-top: 3px solid #ff5555;
+	border-bottom: 3px solid #ff5555;
+}
+
+body {
+	background: #333
+}
+</style>
+</head>
+<body>
+<div id="tip">
+	<h2>HTML5 History Gallery Demo</h2>
+	<img src="tip.png" /><br/>
+	Use the browser's back/forward buttons.<br/>
+	<b>View in Google Chrome!</b><br/>
+	<g:plusone></g:plusone>
+</div>
+<div id="container">
+	<div id="thumbs">
+		<div id="selector" style="margin-left: 0px;"></div>
+	</div>
+	<img id="big" />
+</div>
+<div id="footer">
+	&copy; <a href="https://plus.google.com/101987300122414665063/about" target="_blank">Jonas Gehring</a> &nbsp;&nbsp;-&nbsp;&nbsp; visit my blog <a href="http://www.jjoe64.com" target="_blank">http://www.jjoe64.com</a>
+</div>
+
+<script type="text/javascript">
+var images = [
+	{title:'The Temple of The Frescoes', src:'8990820.jpg'},
+	{title:'Horseshoe Bend', src:'1440137.jpg'},
+	{title:'Snowy Ponderosa', src:'1767292.jpg'},
+	{title:'Two Thumbs Morning', src:'2558954.jpg'},
+	{title:'Glenorchy Central Library', src:'20178548.jpg'}
+]
+
+var selectorTargetLeft = 0
+
+function setBigImage(idx) {
+	document.getElementById('big').setAttribute('src', images[idx].src)
+	images.forEach(function(itm, idxx) {
+		itm.imgNode.setAttribute('class', idxx==idx?'active':'')
+	})
+	selectorTargetLeft = 3+110*idx
+}
+
+function showTip() {
+	alert("Use the browser's back/forward buttons.")
+}
+
+// init thumbs
+images.forEach(function(itm, idx) {
+	var imgNode = document.createElement('img')
+	imgNode.setAttribute("src", itm.src)
+	imgNode.setAttribute("title", itm.title)
+	imgNode.addEventListener('click', showTip)
+	document.getElementById('thumbs').appendChild(imgNode)
+	itm.imgNode = imgNode
+})
+
+// init history
+var displayImage = 2
+if (document.location.search) {
+	var title = unescape(document.location.search).substr(1)
+	for (var i=0; i<images.length; i++) {
+		if (images[i].title == title) {
+			displayImage = i
+			break
+		}
+	}
+}
+images.forEach(function(itm, idx) {
+	history.pushState({idx: idx}, itm.title, "?"+escape(itm.title))
+})
+if (displayImage != images.length-1) {
+	history.go(displayImage - images.length +1)
+}
+// set big image
+setBigImage(displayImage)
+
+window.onpopstate = function(event) {
+	if (event.state) setBigImage(event.state.idx)
+}
+
+// selector interval
+window.setInterval(function() {
+	var elm = document.getElementById('selector')
+	var curLeft = parseInt(elm.style.marginLeft.replace(/px/, ''))
+	if (curLeft < selectorTargetLeft) {
+		curLeft+=8
+	} else  if (curLeft > selectorTargetLeft) {
+		curLeft-=8
+	}
+	if (Math.abs(curLeft-selectorTargetLeft) < 15) {
+		curLeft = selectorTargetLeft
+	}
+	elm.style.marginLeft = curLeft+'px'
+}, 15)
+
+</script>
+<script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+</body>
+</html>
+
